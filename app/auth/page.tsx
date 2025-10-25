@@ -1,27 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-export default function AuthPage() {
+// Turn off static pre-render for safety in prod
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
+// --- Inner component uses the hooks ---
+function AuthInner() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const nextAfterLogin = searchParams.get('next') || '/dashboard';
+  const params = useSearchParams();               // ✅ safe inside Suspense
+  const next = params.get('next') || '/today';
 
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');
-  const [mode, setMode] = useState<'signIn'|'signUp'>('signIn');
+  const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
+  const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string|null>(null);
 
-  // If already logged in, bounce to next
+  // If already logged in, go to next
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getUser();
-      if (data?.user) router.replace(nextAfterLogin);
+      if (data?.user) router.replace(next);
     })();
-  }, [router, nextAfterLogin]);
+  }, [router, next]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,59 +42,62 @@ export default function AuthPage() {
       if (mode === 'signUp') {
         const { error } = await supabase.auth.signUp({ email, password: pwd });
         if (error) throw error;
-        // (Optional) some setups require email confirm. You can show a message, or sign in immediately.
-        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pwd });
-        if (signInErr) throw signInErr;
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password: pwd });
         if (error) throw error;
       }
-
-      // ✅ Redirect only AFTER successful auth
-      router.push(nextAfterLogin);
+      router.replace(next); // go to /today (or whatever ?next= says)
     } catch (err: any) {
-      setMsg(err?.message ?? 'Login failed. Please try again.');
+      setMsg(err?.message ?? 'Something went wrong.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="p-6 max-w-md mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">Sign {mode === 'signIn' ? 'In' : 'Up'}</h1>
-
+    <main className="max-w-md mx-auto p-6 space-y-4">
+      <h1 className="text-2xl font-semibold">Sign {mode === 'signIn' ? 'in' : 'up'}</h1>
       <form onSubmit={onSubmit} className="space-y-3">
         <input
           type="email"
+          className="w-full border rounded px-3 py-2"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
-          className="border p-2 w-full rounded"
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
+          className="w-full border rounded px-3 py-2"
           placeholder="Password"
           value={pwd}
-          onChange={e => setPwd(e.target.value)}
-          className="border p-2 w-full rounded"
+          onChange={(e) => setPwd(e.target.value)}
         />
         <button
           type="submit"
+          className="w-full rounded bg-black text-white py-2"
           disabled={loading}
-          className="px-4 py-2 rounded bg-black text-white"
         >
-          {loading ? 'Please wait…' : (mode === 'signIn' ? 'Sign In' : 'Create Account')}
+          {loading ? 'Please wait…' : mode === 'signIn' ? 'Sign in' : 'Create account'}
         </button>
       </form>
 
-      {msg && <p className="text-sm text-red-500">{msg}</p>}
-
       <button
-        onClick={() => setMode(m => (m === 'signIn' ? 'signUp' : 'signIn'))}
+        onClick={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')}
         className="text-sm underline"
       >
-        {mode === 'signIn' ? "Don't have an account? Sign up" : 'Have an account? Sign in'}
+        {mode === 'signIn' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
       </button>
+
+      {msg && <p className="text-sm text-red-600">{msg}</p>}
     </main>
+  );
+}
+
+// --- Page exported with Suspense wrapper ---
+export default function AuthPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthInner />
+    </Suspense>
   );
 }
