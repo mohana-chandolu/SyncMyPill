@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function QRSettings() {
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://sync-my-pill.vercel.app';
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://shesync.vercel.app';
   const qrUrl = `${site}/welcome`;
 
   function downloadPNG() {
