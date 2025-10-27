@@ -5,7 +5,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 
 export default function QRSettings() {
   const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://sync-my-pill.vercel.app';
-  const qrUrl = `${site}/welcome`; // opens the Welcome page when scanned
+  const qrUrl = `${site}/welcome`;
 
   function downloadPNG() {
     const node = document.getElementById('qr-visible') as HTMLCanvasElement | null;
@@ -19,16 +19,18 @@ export default function QRSettings() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-pink-50 px-4 py-10 text-center space-y-8">
-      {/* Logo + Title */}
-      <div className="flex flex-col items-center">
+      {/* Logo + Title side by side */}
+      <div className="flex items-center justify-center gap-3 sm:gap-4">
         <Image
-          src="/shesync-logo.png" // ✅ using PNG instead of SVG
+          src="/shesync-logo.png"
           alt="SheSync logo"
-          width={120}
-          height={120}
-          className="mb-2 sm:w-[140px] sm:h-[140px]"
+          width={60}
+          height={60}
+          className="sm:w-[80px] sm:h-[80px]"
         />
-        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-800 tracking-wide">SheSync</h1>
+        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-800 tracking-wide">
+          SheSync
+        </h1>
       </div>
 
       {/* QR Code Card */}
@@ -41,16 +43,10 @@ export default function QRSettings() {
           level="H"
           bgColor="#ffffff"
           fgColor="#000000"
-          imageSettings={{
-            src: '/shesync-logo.png', // ✅ PNG for QR center
-            height: 32,
-            width: 32,
-            excavate: true,
-          }}
         />
         <div className="mt-4 text-center">
           <div className="text-sm sm:text-base font-semibold tracking-wide text-gray-800 uppercase">
-            SheSync
+            Scan to open
           </div>
           <div className="text-xs sm:text-sm text-gray-600 break-all">{qrUrl}</div>
         </div>
