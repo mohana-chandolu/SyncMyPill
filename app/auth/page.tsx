@@ -60,21 +60,21 @@ function AuthInner() {
       <form onSubmit={onSubmit} className="space-y-3">
         <input
           type="email"
-          className="w-full border rounded px-3 py-2"
+          className="px-5 py-2 rounded border border-pink-500 text-pink-600 bg-white hover:bg-pink-50 text-sm sm:text-base transition"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
-          className="w-full border rounded px-3 py-2"
+          className="px-5 py-2 rounded border border-pink-500 text-pink-600 bg-white hover:bg-pink-50 text-sm sm:text-base transition"
           placeholder="Password"
           value={pwd}
           onChange={(e) => setPwd(e.target.value)}
         />
         <button
           type="submit"
-          className="w-full rounded bg-black text-white py-2"
+          className="px-5 py-2 rounded border border-greem-500 text-green-600 bg-white hover:bg-green-50 text-sm sm:text-base transition"
           disabled={loading}
         >
           {loading ? 'Please wait…' : mode === 'signIn' ? 'Sign in' : 'Create account'}
