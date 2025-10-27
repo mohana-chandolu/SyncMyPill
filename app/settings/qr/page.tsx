@@ -3,7 +3,7 @@
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function QRSettings() {
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://syncmypill.vercel.app';
   const qrUrl = `${site}/q`;
 
   function downloadPNG() {
