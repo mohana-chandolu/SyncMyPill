@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { QRCodeCanvas } from 'qrcode.react';
-import logo from '/public/shesync-logo.png';   // update this path to match your logo filename
 
 export default function QRSettings() {
   const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://sync-my-pill.vercel.app';
@@ -22,7 +21,7 @@ export default function QRSettings() {
     <main className="min-h-screen flex flex-col items-center justify-center bg-pink-50 p-6 text-center space-y-8">
       {/* logo + app name */}
       <div className="flex flex-col items-center">
-        <Image src={logo} alt="SheSync logo" width={140} height={140} className="mb-2" />
+        <Image src="/shesync-logo.png" alt="SheSync logo" width={140} height={140} />
         <h1 className="text-4xl font-semibold text-gray-800 tracking-wide">SheSync</h1>
       </div>
 
