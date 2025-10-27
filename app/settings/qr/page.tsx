@@ -1,10 +1,12 @@
 'use client';
 
+import Image from 'next/image';
 import { QRCodeCanvas } from 'qrcode.react';
+import logo from '/public/shesync-logo.png';   // update this path to match your logo filename
 
 export default function QRSettings() {
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://syncmypill.vercel.app';
-  const qrUrl = `${site}/q`;
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://sync-my-pill.vercel.app';
+  const qrUrl = `${site}/welcome`;   // opens the Welcome page when scanned
 
   function downloadPNG() {
     const node = document.getElementById('qr-visible') as HTMLCanvasElement | null;
@@ -12,28 +14,40 @@ export default function QRSettings() {
     const url = node.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'SyncMyPill-QR.png';
+    a.download = 'SheSync-QR.png';
     a.click();
   }
 
   return (
-    <main className="p-6 max-w-2xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">Universal QR</h1>
-      <p className="text-gray-600">
-        Scan opens <code>/q</code> (redirects to auth if needed, then Today).
-      </p>
-
-      <div className="bg-white p-6 rounded-xl shadow inline-block print:shadow-none print:p-0">
-        {/* Note: use id, not ref */}
-        <QRCodeCanvas id="qr-visible" value={qrUrl} size={300} includeMargin />
-        <div className="text-center mt-3 text-sm text-gray-600">{qrUrl}</div>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-pink-50 p-6 text-center space-y-8">
+      {/* logo + app name */}
+      <div className="flex flex-col items-center">
+        <Image src={logo} alt="SheSync logo" width={140} height={140} className="mb-2" />
+        <h1 className="text-4xl font-semibold text-gray-800 tracking-wide">SheSync</h1>
       </div>
 
-      <div className="mt-6 flex gap-3">
-        <button onClick={downloadPNG} className="px-4 py-2 rounded bg-black text-white">
+      {/* QR block */}
+      <div className="bg-white p-8 rounded-2xl shadow-lg inline-block">
+        <QRCodeCanvas
+          id="qr-visible"
+          value={qrUrl}
+          size={300}
+          includeMargin
+          bgColor="#ffffff"
+          fgColor="#000000"
+        />
+        <div className="text-center mt-4 text-sm text-gray-600">{qrUrl}</div>
+      </div>
+
+      {/* action buttons */}
+      <div className="flex justify-center gap-4">
+        <button onClick={downloadPNG} className="px-6 py-2 rounded bg-black text-white">
           Download PNG
         </button>
-        <button onClick={() => window.print()} className="px-4 py-2 rounded border">
+        <button
+          onClick={() => window.print()}
+          className="px-6 py-2 rounded border border-black text-black bg-white"
+        >
           Print
         </button>
       </div>
@@ -41,7 +55,9 @@ export default function QRSettings() {
       <style jsx global>{`
         @media print {
           @page { size: A4; margin: 20mm; }
+          body { background: white !important; }
           nav, header, footer, .no-print { display: none !important; }
+          main { justify-content: center; align-items: center; height: 100vh; }
         }
       `}</style>
     </main>
