@@ -83,7 +83,7 @@ export default function FAQBirthControl() {
                     <span
                       className={`transition-transform ${
                         expanded ? 'rotate-45' : ''
-                      } text-2xl leading-none select-none`}
+                      } text-xl leading-none select-none`}
                       aria-hidden="true"
                     >
                       +
