@@ -18,23 +18,23 @@ export default function Contraindications() {
             Who Should Avoid Birth Control Pills?
           </h2>
 
-          <ul className="mt-6 text-gray-700 text-base sm:text-lg leading-relaxed list-disc list-inside space-y-2">
+          <ul className="mt-6 text-gray-900 text-base sm:text-lg leading-relaxed list-disc list-inside space-y-2">
             <li>
               History of blood clots or clotting disorders
-              <span className="block text-gray-600 text-sm sm:text-base italic">
+              <span className="block text-gray-700 text-sm sm:text-base italic">
                 (Risk of serious clots increases)
               </span>
             </li>
             <li>
               Stroke or heart attack history
-              <span className="block text-gray-600 text-sm sm:text-base italic">
+              <span className="block text-gray-700 text-sm sm:text-base italic">
                 (Especially if under 35 and smoke)
               </span>
             </li>
             <li>Uncontrolled high blood pressure</li>
             <li>
               Certain types of migraines
-              <span className="block text-gray-600 text-sm sm:text-base italic">
+              <span className="block text-gray-700 text-sm sm:text-base italic">
                 (Especially migraines with aura)
               </span>
             </li>
@@ -45,7 +45,7 @@ export default function Contraindications() {
             <li>Known allergy to pill ingredients</li>
           </ul>
 
-          <p className="mt-8 text-gray-700 text-base sm:text-lg leading-relaxed text-center">
+          <p className="mt-8 text-rose-700 font-semibold text-base sm:text-lg leading-relaxed text-center">
             Always talk to your healthcare provider before starting or stopping birth control pills,
             especially if you have any of the above conditions.
           </p>
