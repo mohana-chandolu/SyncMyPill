@@ -27,19 +27,20 @@ export default function Welcome() {
 
         {/* Actions → go to /auth with redirect to /today after login */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-          <Link
-            href="/auth?next=/today"
+        <Link
+            href="/login?next=/today"
             className="inline-block px-6 py-3 rounded-lg bg-pink-600 text-white font-medium hover:bg-pink-700 transition"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/auth?next=/today"
+        >
+        Log in
+        </Link>
+        <Link
+            href="/signup?next=/today"
             className="inline-block px-6 py-3 rounded-lg border border-pink-500 text-pink-600 bg-white font-medium hover:bg-pink-50 transition"
-          >
-            Sign up
-          </Link>
+        >
+        Sign up
+        </Link>
         </div>
+
 
         {/* Subtle helper text */}
         <p className="text-xs text-gray-500">
