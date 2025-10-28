@@ -1,7 +1,7 @@
 'use client';
-
-import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
@@ -11,17 +11,14 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
   const [checked, setChecked] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // ❗ If you want these pages locked to signed-in users, keep this guard.
-  // If you want them public, delete this effect.
+  // auth gate (keep if you want these pages protected)
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getUser();
       if (!data?.user) {
-        const next = encodeURIComponent(pathname || '/home');
+        const next = encodeURIComponent(pathname || '/authed');
         router.replace(`/login?next=${next}`);
-      } else {
-        setChecked(true);
-      }
+      } else setChecked(true);
     })();
   }, [router, pathname]);
 
@@ -31,29 +28,28 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
   }
 
   const nav = useMemo(() => ([
-    { href: '/home',                 label: 'Home' },
-    { href: '/about',                label: 'About' },
-    { href: '/common-side-effects',  label: 'Common & Adverse Side Effects' },
-    { href: '/contraindications',    label: 'Contraindications' },
-    { href: '/faq-pills',            label: 'FAQ: Birth Control Pills' },
-    { href: '/missed-pills',         label: 'If You Miss Pills' },
+    { href: '/authed',                label: 'Home' },
+    { href: '/authed/about',          label: 'About' },
+    { href: '/authed/common-side-effects', label: 'Common & Adverse Side Effects' },
+    { href: '/authed/contraindications',   label: 'Contraindications' },
+    { href: '/authed/faq-pills',           label: 'FAQ: Birth Control Pills' },
+    { href: '/authed/missed-pills',        label: 'If You Miss Pills' },
   ]), []);
 
-  if (!checked) return null; // while auth check runs
+  if (!checked) return null;
 
   return (
     <div className="min-h-screen bg-pink-50">
-      {/* Top bar */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
-        <div className="mx-auto max-w-6xl px-4 flex items-center h-14 justify-between">
-          {/* Logo left */}
-          <Link href="/home" className="flex items-center gap-2 font-semibold">
-            <img src="/shesync-logo.png" alt="SheSync" className="h-7 w-7 rounded-full" />
-            <span className="text-gray-900">SheSync</span>
+        <div className="mx-auto max-w-7xl h-14 px-4 flex items-center">
+          {/* LEFT: Bigger logo (no text) */}
+          <Link href="/authed" className="flex items-center">
+            {/* ↑ increase size to 36px */}
+            <Image src="/shesync-logo.png" alt="SheSync" width={36} height={36} className="rounded-full" />
           </Link>
 
-          {/* Desktop menu (right) */}
-          <nav className="hidden md:flex items-center gap-6">
+          {/* CENTER: nav links */}
+          <nav className="hidden md:flex flex-1 justify-center gap-6">
             {nav.map(n => (
               <Link
                 key={n.href}
@@ -65,17 +61,21 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
                 {n.label}
               </Link>
             ))}
+          </nav>
+
+          {/* RIGHT: sign out */}
+          <div className="ml-auto hidden md:flex">
             <button
               onClick={signOut}
               className="text-sm border border-pink-500 text-pink-600 rounded px-3 py-1.5 hover:bg-pink-50"
             >
               Sign out
             </button>
-          </nav>
+          </div>
 
-          {/* Mobile hamburger (right) */}
+          {/* MOBILE: hamburger */}
           <button
-            className="md:hidden inline-flex items-center justify-center h-9 w-9 rounded hover:bg-pink-100"
+            className="md:hidden ml-auto inline-flex items-center justify-center h-9 w-9 rounded hover:bg-pink-100"
             onClick={() => setOpen(v => !v)}
             aria-label="Menu"
           >
@@ -86,7 +86,7 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
           </button>
         </div>
 
-        {/* Mobile slide-down menu */}
+        {/* MOBILE dropdown */}
         {open && (
           <div className="md:hidden border-t bg-white">
             <div className="px-4 py-2 flex flex-col gap-2">
@@ -113,8 +113,7 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
         )}
       </header>
 
-      {/* Page content */}
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
     </div>
   );
 }

@@ -3,14 +3,11 @@ import React from 'react';
 
 export default function PostLoginHome() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-pink-50 px-6 py-12 text-center">
-      {/* Heading */}
-      <h1 className="text-5xl sm:text-6xl font-extrabold mb-6">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-pink-50 px-6 py-6 sm:py-8 text-center">
+      <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 sm:mb-6">
         <span className="text-pink-600">She</span>
         <span className="text-green-600">Sync</span>
       </h1>
-
-      {/* Description */}
       <p className="max-w-3xl text-gray-700 text-lg leading-relaxed">
         Staying on top of your birth control shouldn’t be stressful—
         that’s where we come in. Our app is designed to help you stay
