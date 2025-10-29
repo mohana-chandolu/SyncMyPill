@@ -33,7 +33,7 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
     { href: '/authed/drug-interactions', label: 'Drug Interactions' },
     { href: '/authed/common-side-effects', label: 'Common & Adverse Side Effects' },
     { href: '/authed/contraindications',   label: 'Contraindications' },
-    { href: '/authed/healthandmind',   label: 'healthandmind' },
+    { href: '/authed/healthandmind',   label: 'Health & Mind' },
     { href: '/authed/faq-pills',           label: 'FAQs' },
     { href: '/authed/missed-pills',        label: 'If You Miss Pills' },
   ]), []);
