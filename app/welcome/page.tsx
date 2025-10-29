@@ -22,7 +22,7 @@ export default function Welcome() {
 
         {/* Caption */}
         <p className="text-base sm:text-lg text-gray-700">
-          Track your daily medication in one place — simple, clear, and reliable.
+          Stay in rhythm, stay in control.
         </p>
 
         {/* Actions → go to /auth with redirect to /today after login */}

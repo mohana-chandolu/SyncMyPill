@@ -10,7 +10,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadUser() {
       const { data } = await supabase.auth.getUser();
-      if (!data?.user) router.push('/auth');
+      if (!data?.user) router.push('/authed');
       else setUser(data.user);
     }
     loadUser();
@@ -18,7 +18,7 @@ export default function DashboardPage() {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    router.push('/auth');
+    router.push('/authed');
   }
 
   if (!user) return <p>Loading...</p>;
