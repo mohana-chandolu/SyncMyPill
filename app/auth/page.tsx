@@ -12,7 +12,7 @@ export const fetchCache = 'force-no-store';
 function AuthInner() {
   const router = useRouter();
   const params = useSearchParams();               // ✅ safe inside Suspense
-  const next = params.get('next') || '/today';
+  const next = params.get('next') || '/authed';
 
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');

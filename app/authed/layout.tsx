@@ -47,7 +47,7 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
           {/* LEFT: Bigger logo (no text) */}
           <Link href="/authed" className="flex items-center">
             {/* ↑ increase size to 36px */}
-            <Image src="/shesync-logo.png" alt="SheSync" width={36} height={36} className="rounded-full" />
+            <Image src="/logo-transparent.png" alt="SheSync" width={36} height={36} className="rounded-full" />
           </Link>
 
           {/* CENTER: nav links */}
