@@ -3,8 +3,10 @@
 import { useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 
-function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
-  const next = searchParams?.next || '/today';
+type SearchParams = { next?: string };
+
+function SignUpInner({ searchParams }: { searchParams: SearchParams }) {
+  const next = searchParams?.next || '/authed';
 
   // Auth fields
   const [fullName, setFullName] = useState('');
@@ -28,9 +30,7 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
   const [loading, setLoading] = useState(false);
 
   function toggle(k: string) {
-    setNotifSecondary((cur) =>
-      cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]
-    );
+    setNotifSecondary((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -43,89 +43,106 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
     }
 
     setLoading(true);
-    // 1) Create auth user
-    const { data, error } = await supabase.auth.signUp({ email, password: pwd });
-    if (error || !data.user) {
-      setLoading(false);
-      setMsg(error?.message || 'Sign up failed.');
-      return;
-    }
 
-    // 2) Insert profile row
-    const { error: insertErr } = await supabase.from('profiles').insert({
-      user_id: data.user.id,
-      full_name: fullName,
-      phone,
-      notif_primary: 'alarm',
-      notif_secondary: notifSecondary,
-      pill_time: pillTime + ':00',
-      pill_type: pillType,
-      pack_start: packStart || null,
-      active_pills: activePills,
-      inactive_pills: inactivePills,
-      remind_placebo: remindPlacebo,
-      side_effects: sideEffects || null,
+    // ✅ Sign up ONLY — put all custom fields in user metadata to avoid RLS issues
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password: pwd,
+      options: {
+        data: {
+          full_name: fullName,
+          phone,
+          notif_primary: 'alarm',
+          notif_secondary: notifSecondary, // array OK
+          pill_time: pillTime + ':00',
+          pill_type: pillType,
+          pack_start: packStart || null,
+          active_pills: activePills,
+          inactive_pills: inactivePills,
+          remind_placebo: remindPlacebo,
+          side_effects: sideEffects || null,
+        },
+        // If you use email confirmations, uncomment this:
+        // emailRedirectTo: `${location.origin}${next}`,
+      },
     });
 
     setLoading(false);
-    if (insertErr) {
-      setMsg(insertErr.message);
+
+    if (error) {
+      setMsg(error.message || 'Sign up failed.');
       return;
     }
 
+    // If confirmations are ON, there may be no session yet
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session) {
+      setMsg('Check your email to confirm your account, then sign in.');
+      return;
+    }
+
+    // Logged in immediately → go to next
     window.location.replace(next);
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-pink-50 px-6 py-12">
-      <section className="w-full max-w-2xl bg-white/70 backdrop-blur-sm rounded-2xl shadow p-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Create your SheSync account</h1>
+    <main className="min-h-screen flex items-center justify-center bg-pink-50 px-4 py-16 sm:px-6 sm:py-20">
+      <section className="w-full max-w-md sm:max-w-2xl bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-6 sm:p-10">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 text-center">
+          Create your <span className="text-pink-600">She</span>
+          <span className="text-green-600">Sync</span> account
+        </h1>
 
         <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* 1. Full name */}
+          {/* Full name */}
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Full name</label>
+            <label className="block text-sm mb-1 text-gray-700">Full name</label>
             <input
-              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
+              type="text"
+              placeholder="Full name"
+              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2 placeholder-gray-500"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
           </div>
 
-          {/* 2. Email / phone */}
+          {/* Email / phone */}
           <div>
-            <label className="block text-sm mb-1">Email</label>
+            <label className="block text-sm mb-1 text-gray-700">Email</label>
             <input
               type="email"
-              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
+              placeholder="Email"
+              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2 placeholder-gray-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm mb-1">Phone (optional)</label>
+            <label className="block text-sm mb-1 text-gray-700">Phone (optional)</label>
             <input
               type="tel"
-              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
+              placeholder="Phone (optional)"
+              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2 placeholder-gray-500"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
           </div>
 
-          {/* 3. Password */}
+          {/* Password */}
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Password</label>
+            <label className="block text-sm mb-1 text-gray-700">Password</label>
             <input
               type="password"
-              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
+              placeholder="Password"
+              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2 placeholder-gray-500"
               value={pwd}
               onChange={(e) => setPwd(e.target.value)}
             />
           </div>
 
-          {/* 4. Notification preference */}
+          {/* Notification preference */}
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-2">Notification preferences</label>
+            <label className="block text-sm mb-2 text-gray-700">Notification preferences</label>
             <div className="text-sm text-gray-700 mb-2">Primary: Alarm (always on)</div>
             <div className="flex flex-wrap gap-3">
               {[
@@ -146,9 +163,9 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
             </div>
           </div>
 
-          {/* 5. Time to take pill */}
+          {/* Daily pill time */}
           <div>
-            <label className="block text-sm mb-1">Daily pill time</label>
+            <label className="block text-sm mb-1 text-gray-700">Daily pill time</label>
             <input
               type="time"
               className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
@@ -157,9 +174,9 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
             />
           </div>
 
-          {/* 6. Pill type */}
+          {/* Pill type */}
           <div>
-            <label className="block text-sm mb-1">Pill type</label>
+            <label className="block text-sm mb-1 text-gray-700">Pill type</label>
             <select
               className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
               value={pillType}
@@ -171,9 +188,9 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
             </select>
           </div>
 
-          {/* 7. Start date */}
+          {/* Start date */}
           <div>
-            <label className="block text-sm mb-1">Start date of current pack</label>
+            <label className="block text-sm mb-1 text-gray-700">Start date of current pack</label>
             <input
               type="date"
               className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
@@ -182,9 +199,9 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
             />
           </div>
 
-          {/* 8. Active / inactive pills */}
+          {/* Active / inactive pills */}
           <div>
-            <label className="block text-sm mb-1">Active pills in pack</label>
+            <label className="block text-sm mb-1 text-gray-700">Active pills in pack</label>
             <input
               type="number"
               min={1}
@@ -194,7 +211,7 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
             />
           </div>
           <div>
-            <label className="block text-sm mb-1">Inactive (placebo) pills</label>
+            <label className="block text-sm mb-1 text-gray-700">Inactive (placebo) pills</label>
             <input
               type="number"
               min={0}
@@ -204,9 +221,9 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
             />
           </div>
 
-          {/* 9. Reminder for placebo */}
+          {/* Remind placebo */}
           <div>
-            <label className="block text-sm mb-1">Remind for placebo pills?</label>
+            <label className="block text-sm mb-1 text-gray-700">Remind for placebo pills?</label>
             <select
               className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
               value={remindPlacebo ? 'yes' : 'no'}
@@ -217,12 +234,13 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
             </select>
           </div>
 
-          {/* 10. Side effects */}
+          {/* Side effects */}
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Symptoms / side effects (optional)</label>
+            <label className="block text-sm mb-1 text-gray-700">Symptoms / side effects (optional)</label>
             <textarea
               rows={3}
-              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2"
+              placeholder="e.g., nausea, mood changes, cramps…"
+              className="w-full rounded-lg border border-pink-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 px-3 py-2 placeholder-gray-500"
               value={sideEffects}
               onChange={(e) => setSideEffects(e.target.value)}
             />
@@ -240,11 +258,11 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
           </div>
         </form>
 
-        {msg && <p className="mt-4 text-sm text-red-600">{msg}</p>}
+        {msg && <p className="mt-4 text-sm text-center text-rose-600">{msg}</p>}
 
         <p className="mt-6 text-center text-sm">
           Already have an account?{' '}
-          <a href="/login?next=/today" className="text-pink-600 hover:underline">
+          <a href={`/login?next=${encodeURIComponent('/authed')}`} className="text-pink-600 hover:underline">
             Sign in
           </a>
         </p>
@@ -256,7 +274,6 @@ function SignUpInner({ searchParams }: { searchParams: { next?: string } }) {
 export default function SignUpPage(props: any) {
   return (
     <Suspense fallback={null}>
-      {/* Pass through searchParams so ?next=/today still works */}
       <SignUpInner {...props} />
     </Suspense>
   );
