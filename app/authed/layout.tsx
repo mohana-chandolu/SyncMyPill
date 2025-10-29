@@ -29,10 +29,12 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
 
   const nav = useMemo(() => ([
     { href: '/authed',                label: 'Home' },
-    { href: '/authed/about',          label: 'About' },
+    { href: '/authed/birthcontrol',          label: 'Birth Control' },
+    { href: '/authed/drug-interactions', label: 'Drug Interactions' },
     { href: '/authed/common-side-effects', label: 'Common & Adverse Side Effects' },
     { href: '/authed/contraindications',   label: 'Contraindications' },
-    { href: '/authed/faq-pills',           label: 'FAQ: Birth Control Pills' },
+    { href: '/authed/healthandmind',   label: 'healthandmind' },
+    { href: '/authed/faq-pills',           label: 'FAQs' },
     { href: '/authed/missed-pills',        label: 'If You Miss Pills' },
   ]), []);
 
