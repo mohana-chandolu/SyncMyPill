@@ -5,6 +5,63 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+function UserMenu({ onSignOut }: { onSignOut: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [initial, setInitial] = useState('U');
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      const name = (data?.user?.user_metadata?.full_name as string) || (data?.user?.email as string) || 'User';
+      setInitial(name.trim().charAt(0).toUpperCase());
+    })();
+  }, []);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center gap-2 rounded-xl border border-pink-200 bg-white px-3 py-1.5
+                   text-sm font-medium text-gray-800 hover:bg-pink-50"
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-pink-100 text-pink-700 text-sm font-bold">
+          {initial}
+        </span>
+        <span>My Account</span>
+        <svg className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 12a1 1 0 0 1-.707-.293l-4-4a1 1 0 0 1 1.414-1.414L10 9.586l3.293-3.293a1 1 0 0 1 1.414 1.414l-4 4A1 1 0 0 1 10 12z" clipRule="evenodd"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
+          onMouseLeave={() => setOpen(false)}
+        >
+          <Link href="/authed/account" className="block px-4 py-2.5 text-sm hover:bg-pink-50" onClick={() => setOpen(false)}>
+            My Account
+          </Link>
+          <Link href="/authed/cycle" className="block px-4 py-2.5 text-sm hover:bg-pink-50" onClick={() => setOpen(false)}>
+            Calendar
+          </Link>
+          <Link href="/authed/eco" className="block px-4 py-2.5 text-sm hover:bg-pink-50" onClick={() => setOpen(false)}>
+            Eco & Motivation
+          </Link>
+          <button
+            onClick={() => { setOpen(false); onSignOut(); }}
+            className="w-full text-left px-4 py-2.5 text-sm text-pink-700 hover:bg-pink-50"
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AuthedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -44,13 +101,13 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
     <div className="min-h-screen bg-pink-50">
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
         <div className="mx-auto max-w-7xl h-20 px-4 flex items-center">
-          {/* LEFT: Bigger logo */}
+          {/* LEFT: Logo */}
           <Link href="/authed" className="flex items-center">
             <Image
               src="/logo-transparent.png"
               alt="SheSync"
-              width={88}     // increased width
-              height={88}    // increased height
+              width={88}
+              height={88}
               className="rounded-full object-contain"
               priority
             />
@@ -63,9 +120,7 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
                 key={n.href}
                 href={n.href}
                 className={`text-sm hover:text-pink-600 transition ${
-                  pathname === n.href
-                    ? 'text-pink-600 font-medium'
-                    : 'text-gray-800'
+                  pathname === n.href ? 'text-pink-600 font-medium' : 'text-gray-800'
                 }`}
               >
                 {n.label}
@@ -73,14 +128,9 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
             ))}
           </nav>
 
-          {/* RIGHT: sign out */}
+          {/* RIGHT: User / My Account dropdown */}
           <div className="ml-auto hidden md:flex">
-            <button
-              onClick={signOut}
-              className="text-sm border border-pink-500 text-pink-600 rounded px-3 py-1.5 hover:bg-pink-50"
-            >
-              Sign out
-            </button>
+            <UserMenu onSignOut={signOut} />
           </div>
 
           {/* MOBILE: hamburger */}
@@ -106,19 +156,27 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
                   href={n.href}
                   onClick={() => setOpen(false)}
                   className={`py-2 text-sm ${
-                    pathname === n.href
-                      ? 'text-pink-600 font-medium'
-                      : 'text-gray-800'
+                    pathname === n.href ? 'text-pink-600 font-medium' : 'text-gray-800'
                   }`}
                 >
                   {n.label}
                 </Link>
               ))}
+
+              <div className="my-2 border-t" />
+
+              {/* Mobile equivalents of the user menu */}
+              <Link href="/authed/account" onClick={() => setOpen(false)} className="py-2 text-sm text-gray-800">
+                My Account
+              </Link>
+              <Link href="/authed/cycle" onClick={() => setOpen(false)} className="py-2 text-sm text-gray-800">
+                Calendar
+              </Link>
+              <Link href="/authed/eco" onClick={() => setOpen(false)} className="py-2 text-sm text-gray-800">
+                Eco & Motivation
+              </Link>
               <button
-                onClick={() => {
-                  setOpen(false);
-                  signOut();
-                }}
+                onClick={() => { setOpen(false); signOut(); }}
                 className="text-left py-2 text-sm text-pink-600"
               >
                 Sign out
