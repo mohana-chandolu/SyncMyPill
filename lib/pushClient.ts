@@ -3,7 +3,12 @@ export async function ensurePushSubscription(vapidPublicKey: string): Promise<{ 
   try {
     // Basic capability checks
     if (typeof window === 'undefined') return { ok: false, reason: 'No window' };
-    if (!('serviceWorker' in navigator)) return { ok: false, reason: 'Service workers unsupported' };
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('/sw.js')
+    .then(reg => console.log('SW registered ✅', reg))
+    .catch(err => console.error('SW registration failed ❌', err));
+}
     if (!('Notification' in window)) return { ok: false, reason: 'Notifications unsupported' };
 
     // Ask permission if not yet decided
