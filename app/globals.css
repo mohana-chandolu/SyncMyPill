@@ -18,6 +18,11 @@
     --foreground: #ededed;
   }
 }
+/* Stop iOS Safari from auto-zooming inputs < 16px */
+input, select, textarea, button {
+  font-size: 16px;
+}
+
 
 body {
   background: var(--background);

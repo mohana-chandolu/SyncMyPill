@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -13,7 +14,7 @@ function isIOS() {
 }
 function isStandalone() {
   if (typeof window === 'undefined') return false;
-  // iOS Safari exposes navigator.standalone; other UAs expose display-mode media query
+  // iOS: navigator.standalone; others: display-mode media query
   // @ts-ignore
   const iosStandalone = !!window.navigator?.standalone;
   const displayModeStandalone =
@@ -22,7 +23,7 @@ function isStandalone() {
   return !!(iosStandalone || displayModeStandalone);
 }
 
-/* ---------- User menu ---------- */
+/* ---------- User menu (desktop) ---------- */
 function UserMenu({ onSignOut }: { onSignOut: () => void }) {
   const [open, setOpen] = useState(false);
   const [initial, setInitial] = useState('U');
@@ -68,8 +69,8 @@ function UserMenu({ onSignOut }: { onSignOut: () => void }) {
           <Link href="/authed/cycle" className="block px-4 py-2.5 text-sm hover:bg-pink-50" onClick={() => setOpen(false)}>
             Calendar
           </Link>
-          <Link href="/authed/eco" className="block px-4 py-2.5 text-sm hover:bg-pink-50" onClick={() => setOpen(false)}>
-            Eco & Motivation
+          <Link href="/authed/healthandmind" className="block px-4 py-2.5 text-sm hover:bg-pink-50" onClick={() => setOpen(false)}>
+            Health &amp; Mind
           </Link>
           <button
             onClick={() => { setOpen(false); onSignOut(); }}
@@ -112,7 +113,6 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
   // Decide when to show CTA / hint, and auto-register if already granted
   useEffect(() => {
     if (!checked) return;
-
     if (typeof window === 'undefined') return;
 
     const hasNotifications = 'Notification' in window;
@@ -174,7 +174,7 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
       { href: '/authed/drug-interactions', label: 'Drug Interactions' },
       { href: '/authed/common-side-effects', label: 'Common & Adverse Side Effects' },
       { href: '/authed/contraindications', label: 'Contraindications' },
-      { href: '/authed/healthandmind', label: 'Health & Mind' },
+      // Health & Mind intentionally NOT here (moved under My Account)
       { href: '/authed/faq-pills', label: 'FAQs' },
       { href: '/authed/missed-pills', label: 'If You Miss Pills' },
     ],
@@ -265,12 +265,14 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
 
               <div className="my-2 border-t" />
 
-              {/* Mobile equivalents */}
+              {/* iOS PWA hint (mobile) */}
               {iosNeedsPwa && (
                 <div className="py-2 text-xs text-pink-800">
                   Install for notifications: <span className="font-semibold">Share → Add to Home Screen</span>
                 </div>
               )}
+
+              {/* Enable push button (mobile) */}
               {showPushCta && (
                 <button
                   onClick={() => {
@@ -282,14 +284,16 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
                   Enable reminders
                 </button>
               )}
+
+              {/* Account-only items (no Eco; Health & Mind lives here) */}
               <Link href="/authed/account" onClick={() => setOpen(false)} className="py-2 text-sm text-gray-800">
                 My Account
               </Link>
               <Link href="/authed/cycle" onClick={() => setOpen(false)} className="py-2 text-sm text-gray-800">
                 Calendar
               </Link>
-              <Link href="/authed/eco" onClick={() => setOpen(false)} className="py-2 text-sm text-gray-800">
-                Eco & Motivation
+              <Link href="/authed/healthandmind" onClick={() => setOpen(false)} className="py-2 text-sm text-gray-800">
+                Health &amp; Mind
               </Link>
               <button
                 onClick={() => {
